@@ -1,0 +1,8 @@
+conda create --name software
+conda activate software
+conda install -c bioconda trinity
+conda install -c bioconda detonate
+conda install bowtie #already in csf
+conda install -c lmfaber transrate #https://github.com/blahah/transrate/issues/215 
+conda install -c bioconda hmmer #conflict with trinity <-- gone later
+conda install -c bioconda magicblast
