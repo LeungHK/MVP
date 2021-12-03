@@ -8,7 +8,12 @@ conda env create --file=/mnt/iusers01/sbc01/a73590hl/software/Spider-Pipeline/en
 #Then use conda activate spider-motif and conda deactivate to activate or deactive the environment.
 #name of conda environment: spider-motif
 #^runs the meme motif search algorithm.
+
+conda activate spider-motif
+
 conda install -c bioconda meme
+
+conda deactivate
 
 source activate spider-motif
 
