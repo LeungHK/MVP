@@ -10,6 +10,16 @@ conda env create --file=/mnt/iusers01/sbc01/a73590hl/software/Spider-Pipeline/en
 #^runs the meme motif search algorithm.
 conda install -c bioconda meme
 
+source activate spider-motif
+
+cd /data/$1
+
+python Spider-Pipeline/spider_pipeline_runner.py -mk spider_pipeline_$1
+
+python Spider-Pipeline/spider_pipeline_runner.py -rme /data/$1/spider_pipeline_$1 /data/$1/aa_seq_sorted_match_$1.fasta -t 16
+
+#####
+
 python /home/chris/linux_chris/software/Spider-Pipeline/spider_pipeline_runner.py -mk spider_pipeline_${SRA}
 
 python /home/chris/linux_chris/software/Spider-Pipeline/spider_pipeline_runner.py -rme /home/chris/linux_chris/data/SRR7028533/spider_pipeline_SRR7028533 \
