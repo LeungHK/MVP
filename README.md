@@ -22,6 +22,8 @@ bowtie2 -p 40 -x GRCh38_noalt_as -1 SAMPLE_R1.fastq.gz -2 SAMPLE_R2.fastq.gz --u
 
 gzip
 
+
+
 ^add filter to remove rRNA with SortMeRNA
 
 # Flowchart of methodology from literature review:
