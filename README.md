@@ -10,4 +10,4 @@ Leung Ho Kwan
 Pipeline:
 Raw reads --> Bowtie2 query against mosquito and drosophila database (NCBI) to remove host sequences --> trimmomatic with Trinity *de novo* transcriptome assembly -->
 
-![alt text](https://github.com/LeungHK/MVP/blob/main/mosq%20virome%20workflow.jpg)
+![Hi alt text](https://github.com/LeungHK/MVP/blob/main/mosq%20virome%20workflow.jpg)
