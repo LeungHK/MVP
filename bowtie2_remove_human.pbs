@@ -1,0 +1,81 @@
+#!/bin/sh
+### Job name
+#PBS -N chris_bowtie2_human
+### Declare job non-rerunable
+#PBS -r n
+#PBS -k oe
+
+#PBS -o /home/d24h_prog2/chris/logs/${PBS_JOBNAME}.${PBS_JOBID}.out
+
+################Change This For Different Queue#####################
+#PBS -q stdq1
+####################################################################
+
+### Wall time required. This example is 48 hours
+#PBS -l walltime=96:00:00
+
+### Number of nodes 
+### The following means 1 nodes required. Processor Per Node=20, 
+### ppn (Processor Per Node) can be any number up to 20.
+###PBS -l nodes=2:ppn=20
+
+#########REMEMBER TO CHANGE THE THREAD NUMBER ACCORDING TO THE CHOSEN NODE#################
+###PBS -l nodes=1:ppn=40
+#PBS -l select=1:ncpus=40:mem=755gb
+
+###########################################################################################
+
+#The following stuff will be executed in the first allocated node.
+#Please don't modify it
+
+PATH=$PBS_O_PATH
+cd $PBS_O_WORKDIR
+# Define number of processors
+NPROCS=`wc -l < $PBS_NODEFILE`
+NNODES=`uniq $PBS_NODEFILE | wc -l`
+NCORES=$((NPROCS / NNODES))
+
+JID=`echo ${PBS_JOBID}| sed "s/.hpc2015-mgt.hku.hk//"`
+echo Job ID : ${JID}
+echo ${NPROCS} CPUs allocated: `cat $PBS_NODEFILE` 1>&2
+echo This PBS script is running on host `hostname` 1>&2
+echo Working directory is $PBS_O_WORKDIR  1>&2
+
+echo ============== ${PBS_JOBNAME} : ${NPROCS} CPUs ====================
+echo "Job Start Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+##############################################################################################################################################################
+
+#SRA accession
+SRA="CR103"
+
+module load anaconda3/2021.05
+
+source activate chris_software
+
+cd /home/d24h_prog2/chris/data/virome_mosq/
+
+wget https://genome-idx.s3.amazonaws.com/bt/GRCh38_noalt_as.zip
+
+unzip GRCh38_noalt_as.zip
+
+#mkdir ${SRA}
+#cd ${SRA}
+
+#Bowtie2
+bowtie2 -x GRCh38_noalt_as/GRCh38_noalt_as \
+-1 /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_host_removed.1_R1.fq.gz \
+-2 /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_host_removed.2_R2.fq.gz \
+--very-sensitive-local -p 40 --phred33 --no-mixed \
+-X 600 --un-conc /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_human_removed > /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_human_mapped_and_unmapped.sam
+
+gzip --suffix=_R1.fq.gz /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_human_removed.1 #need to be .fq.gz format for Trinity
+gzip --suffix=_R2.fq.gz /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_human_removed.2
+
+##############################################################################################################################################################
+
+echo "Job Finish Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+mv ~/*${PBS_JOBNAME}* /home/d24h_prog2/chris/logs/
+
+exit 0
