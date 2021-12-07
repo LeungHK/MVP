@@ -1,0 +1,128 @@
+#!/bin/sh
+### Job name
+#PBS -N chris_bowtie_trinity_transrate_blastn_CR103
+### Declare job non-rerunable
+#PBS -r n
+#PBS -k oe
+
+###PBS -o /home/d24h_prog2/chris/logs/blastn_nt_CR104_Trinity.o
+
+################Change This For Different Queue#####################
+#PBS -q stdq1
+####################################################################
+
+### Wall time required. This example is 48 hours
+#PBS -l walltime=96:00:00
+
+### Number of nodes 
+### The following means 1 nodes required. Processor Per Node=20, 
+### ppn (Processor Per Node) can be any number up to 20.
+###PBS -l nodes=2:ppn=20
+
+#########REMEMBER TO CHANGE THE THREAD NUMBER ACCORDING TO THE CHOSEN NODE#################
+###PBS -l nodes=1:ppn=40:mem=755gb
+#PBS -l select=1:ncpus=40:mem=755gb
+
+###-l select=1:ncpus=4:mem=1gb
+
+###########################################################################################
+
+#The following stuff will be executed in the first allocated node.
+#Please don't modify it
+
+PATH=$PBS_O_PATH
+cd $PBS_O_WORKDIR
+# Define number of processors
+NPROCS=`wc -l < $PBS_NODEFILE`
+NNODES=`uniq $PBS_NODEFILE | wc -l`
+NCORES=$((NPROCS / NNODES))
+
+JID=`echo ${PBS_JOBID}| sed "s/.hpc2015-mgt.hku.hk//"`
+echo Job ID : ${JID}
+echo ${NPROCS} CPUs allocated: `cat $PBS_NODEFILE` 1>&2
+echo This PBS script is running on host `hostname` 1>&2
+echo Working directory is $PBS_O_WORKDIR  1>&2
+
+echo ============== ${PBS_JOBNAME} : ${NPROCS} CPUs ====================
+echo "Job Start Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+##############################################################################################################################################################
+
+#SRA accession
+SRA="CR103"
+
+module load anaconda3/2021.05
+
+source activate chris_software
+
+cd /home/d24h_prog2/chris/data/virome_mosq/
+
+mkdir ${SRA}
+cd ${SRA}
+
+echo "Checkpoint 1; Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+#Bowtie2
+bowtie2 -x /home/d24h_prog2/chris/data/virome_mosq/db_culicidae_nuclear_mito_genome_20210801/culicidae_nuclear_mito_genome_seq_bowtie2 \
+-1 /home/d24h_prog2/chris/data/virome_mosq/rna-seq-mosquito-20210915/reads/${SRA}/${SRA}_1_trimmed.fq \
+-2 /home/d24h_prog2/chris/data/virome_mosq/rna-seq-mosquito-20210915/reads/${SRA}/${SRA}_2_trimmed.fq \
+--very-sensitive-local -p 40 --phred33 --no-mixed \
+-X 600 --un-conc ${SRA}_host_removed > ${SRA}_mapped_and_unmapped.sam
+
+gzip --suffix=_R1.fq.gz ${SRA}_host_removed.1 #need to be .fq.gz format for Trinity
+gzip --suffix=_R2.fq.gz ${SRA}_host_removed.2
+
+echo "Checkpoint 2; Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+#Trinity
+Trinity --seqType fq --max_memory 755G --CPU 40 \
+--left ${SRA}_host_removed.1_R1.fq.gz \
+--right ${SRA}_host_removed.2_R2.fq.gz \
+--quality_trimming_params ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/TruSeq3-PE.fa:2:30:10,SLIDINGWINDOW:4:15,LEADING:20,TRAILING:20,MINLEN:36 \
+--SS_lib_type FR --output trinity_assembly_${SRA}_bowtie-input --no_bowtie --full_cleanup #--no_salmon
+
+transrate --assembly trinity_assembly_${SRA}_bowtie-input.Trinity.fasta \
+--left ${SRA}_host_removed.1_R1.fq.gz \
+--right ${SRA}_host_removed.2_R2.fq.gz \
+--threads 40 --output transrate_trinity_${SRA}_bowtie-input
+
+echo "Checkpoint 3; Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+#Trinity without bowtie
+Trinity --seqType fq --max_memory 755G --CPU 40 \
+--left /home/d24h_prog2/chris/data/virome_mosq/rna-seq-mosquito-20210915/reads/${SRA}/${SRA}_1_trimmed.fq \
+--right /home/d24h_prog2/chris/data/virome_mosq/rna-seq-mosquito-20210915/reads/${SRA}/${SRA}_2_trimmed.fq \
+--quality_trimming_params ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/TruSeq3-PE.fa:2:30:10,SLIDINGWINDOW:4:15,LEADING:20,TRAILING:20,MINLEN:36 \
+--SS_lib_type FR --output trinity_assembly_${SRA}_raw --no_bowtie --full_cleanup #--no_salmon
+
+transrate --assembly trinity_assembly_${SRA}_raw.Trinity.fasta \
+--left /home/d24h_prog2/chris/data/virome_mosq/rna-seq-mosquito-20210915/reads/${SRA}/${SRA}_1_trimmed.fq \
+--right /home/d24h_prog2/chris/data/virome_mosq/rna-seq-mosquito-20210915/reads/${SRA}/${SRA}_2_trimmed.fq \
+--threads 40 --output transrate_trinity_${SRA}_raw
+
+echo "Checkpoint 4; Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+cd /home/d24h_prog2/PUBLIC_DB/nt/
+
+/home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/blastn \
+-query /home/d24h_prog2/chris/data/virome_mosq/${SRA}/trinity_assembly_${SRA}_bowtie-input.Trinity.fasta \
+-db nt \
+-num_threads 40 \
+-out /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_blastn_nt.out -evalue 0.00005 -outfmt 0
+
+echo "Checkpoint 5; Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+/home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/blastn \
+-query /home/d24h_prog2/chris/data/virome_mosq/${SRA}/trinity_assembly_${SRA}_raw.Trinity.fasta \
+-db nt \
+-num_threads 40 \
+-out /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_blastn_nt_raw.out -evalue 0.00005 -outfmt 0
+
+
+##############################################################################################################################################################
+
+echo "Job Finish Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+mv ~/*${PBS_JOBNAME}* /home/d24h_prog2/chris/logs/
+
+exit 0
