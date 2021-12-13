@@ -41,6 +41,8 @@ cd /home/d24h_prog2/PUBLIC_DB/nt/
 -db nt \
 -num_threads 40 \
 -out /home/d24h_prog2/chris/data/virome_mosq/${SRA}/${SRA}_blastn_nt_fmt6.out -evalue 0.00005 -outfmt 6
+###-outfmt "6 qseqid qlen evalue bitscore score pident mismatch gaps ppos staxid ssciname scomname sblastname stitle sskingdom qstart qend sstart send sseqid sgi" \
+###-max_target_seqs 1
 
 #Kronatools
 cd /home/d24h_prog2/chris/data/virome_mosq/${SRA}
