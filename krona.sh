@@ -31,7 +31,11 @@ source activate chris_software
 
 conda install -c bioconda krona
 
+#https://github.com/marbl/Krona/wiki/Installing 
+#updateTaxonomy.sh
 cp -r /home/d24h_prog2/public_program/KronaTools-2.8/taxonomy/* /home/d24h_prog2/.conda/envs/chris_software/opt/krona/taxonomy
+
+##updateAccessions.sh
 
 #BLASTN with outfmt6 for kronatools
 cd /home/d24h_prog2/PUBLIC_DB/nt/
@@ -48,3 +52,7 @@ cd /home/d24h_prog2/PUBLIC_DB/nt/
 cd /home/d24h_prog2/chris/data/virome_mosq/${SRA}
 
 ktImportBLAST ${SRA}_blastn_nt_fmt6.out.out –o ${SRA}_metagenome_profile.html
+##./ImportBLAST.pl  blast_output_file -o blast_results.html
+
+#Fun read of a rollercoaster ride at:
+#https://github.com/marbl/Krona/issues/46
