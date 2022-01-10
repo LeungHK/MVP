@@ -118,7 +118,7 @@ cd ${SRA}
 
 
 ####SCRIPT
-${path}spades.py --isolate --meta --memory 755G --threads ${threads} \
+${path}spades.py --isolate --meta --memory 755 --threads ${threads} \
 -1 ${SRA}_host_removed.1_R1.fq.gz \
 -2 ${SRA}_host_removed.2_R2.fq.gz \
 --tmp-dir ${TMPDIR} \
