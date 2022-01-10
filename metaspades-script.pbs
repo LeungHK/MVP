@@ -48,7 +48,7 @@ SRA="CR103"
 threads="40"
 
 cd /home/d24h_prog2/chris/data/virome_mosq/
-mkdir ${SRA}
+#mkdir ${SRA}
 cd ${SRA}
 
 mkdir ../TMPDIR
@@ -71,7 +71,6 @@ cd SPAdes-3.15.3-Linux/bin/
 path="/home/d24h_prog2/chris/software/SPAdes-3.15.3-Linux/bin/"
 
 cd /home/d24h_prog2/chris/data/virome_mosq/
-mkdir ${SRA}
 cd ${SRA}
 
 #spades.py [options] -o <output_dir>
