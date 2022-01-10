@@ -1,11 +1,9 @@
 #!/bin/sh
 ### Job name
-#PBS -N chris_metaspades_transrate_blastn_CR103
+#PBS -N chris_metaspades_transrate_CR103
 ### Declare job non-rerunable
 #PBS -r n
 #PBS -k oe
-
-###PBS -o /home/d24h_prog2/chris/logs/blastn_nt_CR104_Trinity.o
 
 ################Change This For Different Queue#####################
 #PBS -q stdq1
@@ -20,7 +18,6 @@
 ###PBS -l nodes=2:ppn=20
 
 #########REMEMBER TO CHANGE THE THREAD NUMBER ACCORDING TO THE CHOSEN NODE#################
-###PBS -l nodes=1:ppn=40:mem=755gb
 #PBS -l select=1:ncpus=40:mem=755gb
 
 ###########################################################################################
@@ -50,10 +47,6 @@ echo "Job Start Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
 SRA="CR103"
 threads="40"
 
-
-module load anaconda3/2021.05
-source activate chris_software
-
 cd /home/d24h_prog2/chris/data/virome_mosq/
 mkdir ${SRA}
 cd ${SRA}
@@ -63,6 +56,8 @@ mkdir ../TMPDIR
 TMPDIR="/home/d24h_prog2/chris/data/virome_mosq/TMPDIR"
 echo ${TMPDIR}
 
+#module load anaconda3/2021.05
+#source activate chris_software
 ###https://anaconda.org/bioconda/spades
 #conda install -c bioconda spades
 ###or
@@ -123,7 +118,6 @@ cd ${SRA}
 #K<##>/ – directory containing intermediate files from the run with K=<##>. These files should not be used as assembly results; use resulting contigs/scaffolds in files mentioned above.
 
 
-
 ####SCRIPT
 ${path}spades.py --isolate --meta --memory 755G --threads ${threads} \
 -1 ${SRA}_host_removed.1_R1.fq.gz \
@@ -139,8 +133,6 @@ transrate --assembly contigs.fasta \
 --threads ${threads} --output transrate_metaspades_${SRA}_bowtie-input
 
 echo "This is the body" | mail -s "Subject: metaspades+transrate is done" chris.leung@c2i.hk
-
-
 ##############################################################################################################################################################
 
 echo "Job Finish Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
