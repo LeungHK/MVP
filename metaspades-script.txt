@@ -1,0 +1,150 @@
+#!/bin/sh
+### Job name
+#PBS -N chris_metaspades_transrate_blastn_CR103
+### Declare job non-rerunable
+#PBS -r n
+#PBS -k oe
+
+###PBS -o /home/d24h_prog2/chris/logs/blastn_nt_CR104_Trinity.o
+
+################Change This For Different Queue#####################
+#PBS -q stdq1
+####################################################################
+
+### Wall time required. This example is 48 hours
+#PBS -l walltime=96:00:00
+
+### Number of nodes 
+### The following means 1 nodes required. Processor Per Node=20, 
+### ppn (Processor Per Node) can be any number up to 20.
+###PBS -l nodes=2:ppn=20
+
+#########REMEMBER TO CHANGE THE THREAD NUMBER ACCORDING TO THE CHOSEN NODE#################
+###PBS -l nodes=1:ppn=40:mem=755gb
+#PBS -l select=1:ncpus=40:mem=755gb
+
+###########################################################################################
+
+#The following stuff will be executed in the first allocated node.
+#Please don't modify it
+
+PATH=$PBS_O_PATH
+cd $PBS_O_WORKDIR
+# Define number of processors
+NPROCS=`wc -l < $PBS_NODEFILE`
+NNODES=`uniq $PBS_NODEFILE | wc -l`
+NCORES=$((NPROCS / NNODES))
+
+JID=`echo ${PBS_JOBID}| sed "s/.hpc2015-mgt.hku.hk//"`
+echo Job ID : ${JID}
+echo ${NPROCS} CPUs allocated: `cat $PBS_NODEFILE` 1>&2
+echo This PBS script is running on host `hostname` 1>&2
+echo Working directory is $PBS_O_WORKDIR  1>&2
+
+echo ============== ${PBS_JOBNAME} : ${NPROCS} CPUs ====================
+echo "Job Start Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+##############################################################################################################################################################
+
+#SRA accession
+SRA="CR103"
+threads="40"
+
+
+module load anaconda3/2021.05
+source activate chris_software
+
+cd /home/d24h_prog2/chris/data/virome_mosq/
+mkdir ${SRA}
+cd ${SRA}
+
+mkdir ../TMPDIR
+#export TMPDIR='/home/d24h_prog2/chris/data/virome_mosq/TMPDIR'
+TMPDIR="/home/d24h_prog2/chris/data/virome_mosq/TMPDIR"
+echo ${TMPDIR}
+
+###https://anaconda.org/bioconda/spades
+#conda install -c bioconda spades
+###or
+#source install -c bioconda spades
+
+###https://github.com/ablab/spades#meta
+cd /home/d24h_prog2/chris/software/
+wget http://cab.spbu.ru/files/release3.15.3/SPAdes-3.15.3-Linux.tar.gz
+tar -xzf SPAdes-3.15.3-Linux.tar.gz
+cd SPAdes-3.15.3-Linux/bin/
+path="/home/d24h_prog2/chris/software/SPAdes-3.15.3-Linux/bin/"
+
+cd /home/d24h_prog2/chris/data/virome_mosq/
+mkdir ${SRA}
+cd ${SRA}
+
+#spades.py [options] -o <output_dir>
+#--isolate
+#--meta   (same as metaspades.py)     This flag is recommended when assembling metagenomic data sets (runs metaSPAdes, see paper for more details). 
+#Currently metaSPAdes supports only a single short-read library which has to be paired-end (we hope to remove this restriction soon). 
+#In addition, you can provide long reads (e.g. using --pacbio or --nanopore options), but hybrid assembly for metagenomes remains an experimental pipeline 
+#and optimal performance is not guaranteed. It does not support careful mode (mismatch correction is not available). 
+#In addition, you cannot specify coverage cutoff for metaSPAdes. 
+#Note that metaSPAdes might be very sensitive to presence of the technical sequences remaining in the data (most notably adapter readthroughs), 
+#please run quality control and pre-process your data accordingly.
+
+#-1 <file_name>     File with forward reads.
+#-2 <file_name>     File with reverse reads.
+#-s <file_name>     File with unpaired reads.
+#-t <int> (or --threads <int>)     Number of threads. The default value is 16.
+
+#-m <int> (or --memory <int>)     Set memory limit in Gb. SPAdes terminates if it reaches this limit. The default value is 250 Gb. 
+#Actual amount of consumed RAM will be below this limit. Make sure this value is correct for the given machine. 
+#SPAdes uses the limit value to automatically determine the sizes of various buffers, etc.
+
+#--tmp-dir <dir_name>     Set directory for temporary files from read error correction. The default value is <output_dir>/corrected/tmp
+
+#-k <int,int,...>     Comma-separated list of k-mer sizes to be used (all values must be odd, less than 128 and listed in ascending order). 
+#If --sc is set the default values are 21,33,55. For multicell data sets K values are automatically selected using maximum read length (see note for assembling long Illumina paired reads for details). 
+#To properly select K values for IonTorrent data read section 3.3.
+
+#<output_dir>/contigs.fasta contains resulting contigs
+#The full list of <output_dir> content is presented below:
+#scaffolds.fasta – resulting scaffolds (recommended for use as resulting sequences)
+#contigs.fasta – resulting contigs
+#assembly_graph.fastg – assembly graph
+#contigs.paths – contigs paths in the assembly graph
+#scaffolds.paths – scaffolds paths in the assembly graph
+#before_rr.fasta – contigs before repeat resolution
+#corrected/ – files from read error correction
+#    configs/ – configuration files for read error correction
+#    corrected.yaml – internal configuration file
+#    Output files with corrected reads
+#params.txt – information about SPAdes parameters in this run
+#spades.log – SPAdes log
+#dataset.info – internal configuration file
+#input_dataset.yaml – internal YAML data set file
+#K<##>/ – directory containing intermediate files from the run with K=<##>. These files should not be used as assembly results; use resulting contigs/scaffolds in files mentioned above.
+
+
+
+####SCRIPT
+${path}spades.py --isolate --meta --memory 755G --threads ${threads} \
+-1 ${SRA}_host_removed.1_R1.fq.gz \
+-2 ${SRA}_host_removed.2_R2.fq.gz \
+--tmp-dir ${TMPDIR} \
+-o .
+
+echo "This is the body" | mail -s "Subject: metaspades is done" --attach=contigs.fasta chris.leung@c2i.hk
+
+transrate --assembly contigs.fasta \
+--left ${SRA}_host_removed.1_R1.fq.gz \
+--right ${SRA}_host_removed.2_R2.fq.gz \
+--threads ${threads} --output transrate_metaspades_${SRA}_bowtie-input
+
+echo "This is the body" | mail -s "Subject: metaspades+transrate is done" chris.leung@c2i.hk
+
+
+##############################################################################################################################################################
+
+echo "Job Finish Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+mv ~/*${PBS_JOBNAME}* /home/d24h_prog2/chris/logs/
+
+exit 0
