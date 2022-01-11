@@ -36,5 +36,7 @@ gzip
 
 ^or use krona chart to look for blood meal host and their abundance >> go to vertebrates clade
 
+>> virus rdrp profile HMMs from pfam, to search translated RNA contigs for viruses
+
 >>cluster by co-occurence
 (https://github.com/czbiohub/california-mosquito-study)
