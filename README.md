@@ -36,6 +36,21 @@ gzip
 
 ^or use krona chart to look for blood meal host and their abundance >> go to vertebrates clade
 
+https://www.metagenomics.wiki/tools/blast/blastn-output-format-6
+
+>blastn  -query genes.fasta  -subject genome.fasta  -outfmt 6
+>-outfmt "6 qseqid sseqid evalue"
+
+staxids   Subject Taxonomy ID(s), separated by a ';'
+
+sscinames Subject Scientific Name(s), separated by a ';'
+
+scomnames Subject Common Name(s), separated by a ';'
+
+sblastnames Subject Blast Name(s), separated by a ';'   (in alphabetical order)
+
+sskingdoms  Subject Super Kingdom(s), separated by a ';'     (in alphabetical order)
+
 >> virus rdrp profile HMMs from pfam, to search translated RNA contigs for viruses
 
 >>cluster by co-occurence
