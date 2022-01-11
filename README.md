@@ -39,6 +39,7 @@ gzip
 https://www.metagenomics.wiki/tools/blast/blastn-output-format-6
 
 >blastn  -query genes.fasta  -subject genome.fasta  -outfmt 6
+
 >-outfmt "6 qseqid sseqid evalue"
 
 staxids   Subject Taxonomy ID(s), separated by a ';'
