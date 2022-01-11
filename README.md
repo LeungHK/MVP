@@ -28,3 +28,10 @@ gzip
 
 # Flowchart of methodology from literature review:
 ![Hi alt text](https://github.com/LeungHK/MVP/blob/main/mosq%20virome%20workflow.jpg)
+
+## What's next
+>>virus list, translate and look for orf
+>>MEGAN vertebrate LCA list --> blast for blood meal host, can use contig label to refer back to mosquito sample id.
+^or use krona chart to look for blood meal host and their abundance >> go to vertebrates clade
+>>cluster by co-occurence
+(https://github.com/czbiohub/california-mosquito-study)
