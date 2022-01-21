@@ -1,5 +1,4 @@
-getwd()
-setwd("D:/Job 2021/yunshi project")
+setwd()
 
 mydata <- read.csv(file = 'bloodmeal_batson_158_blastn_nt.out6', sep = '\t', header = FALSE)
 colnames(mydata) <- c("qseqid", "sseqid", "evalue", "pident", "staxid", "ssciname",
