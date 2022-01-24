@@ -1,0 +1,85 @@
+#!/bin/sh
+### Job name
+#PBS -N chris_bloodmeal-id-blastn_taxid_nt
+### Declare job non-rerunable
+#PBS -r n
+#PBS -j oe
+#PBS -k oe
+
+################Change This For Different Queue#####################
+#PBS -q stdq1
+###PBS -q medq1
+####################################################################
+
+### Wall time required. This example is 48 hours
+#PBS -l walltime=96:00:00
+
+### Number of nodes 
+### The following means 1 nodes required. Processor Per Node=20, 
+### ppn (Processor Per Node) can be any number up to 20.
+###PBS -l nodes=2:ppn=20
+
+#########REMEMBER TO CHANGE THE THREAD NUMBER ACCORDING TO THE CHOSEN NODE#################
+###PBS -l nodes=1:ppn=40
+#PBS -l select=1:ncpus=40:mem=755gb
+###PBS -l select=1:ncpus=64:mem=1500gb
+###########################################################################################
+
+#The following stuff will be executed in the first allocated node.
+#Please don't modify it
+
+PATH=$PBS_O_PATH
+cd $PBS_O_WORKDIR
+# Define number of processors
+NPROCS=`wc -l < $PBS_NODEFILE`
+NNODES=`uniq $PBS_NODEFILE | wc -l`
+NCORES=$((NPROCS / NNODES))
+
+JID=`echo ${PBS_JOBID}| sed "s/.hpc2015-mgt.hku.hk//"`
+echo Job ID : ${JID}
+echo ${NPROCS} CPUs allocated: `cat $PBS_NODEFILE` 1>&2
+echo This PBS script is running on host `hostname` 1>&2
+echo Working directory is $PBS_O_WORKDIR  1>&2
+
+echo ============== ${PBS_JOBNAME} : ${NPROCS} CPUs ====================
+echo "Job Start Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+##############################################################################################################################################################
+
+echo "number of threads: ${NPROCS}"
+threads="40"
+echo "number of threads: ${threads}"
+
+#SRA accession
+SRA="batson_158"
+
+path="/home/d24h_prog2/chris/taxon_discovery/${SRA}"
+
+#cd /home/d24h_prog2/PUBLIC_DB/nt/
+cd /home/d24h_prog2/chris/data/blast/
+#/home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/update_blastdb.pl --decompress nt nr taxdb
+
+ls taxdb.*
+
+/home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/blastn \
+-query ${path}/RNA_seq_sorted_match_bloodmeal_${SRA}.fasta \
+-db nt \
+-num_threads ${threads} \
+-out ${path}/bloodmeal_${SRA}_blastn_nt.out6 \
+-evalue 0.00005 \
+-outfmt "6 qseqid sseqid evalue pident staxids sscinames scomnames stitle sskingdoms salltitles"
+
+cd ${path}
+sort -k1,1 -k3,3g -k4,4gr bloodmeal_${SRA}_blastn_nt.out6 | sort -u -k1,1 --merge > bestHits_bloodmeal_${SRA}_blastn_nt.out6
+
+##############################################################################################################################################################
+
+echo "Job Finish Time is `date "+%Y/%m/%d -- %H:%M:%S"`"
+
+mv ~/*${PBS_JOBNAME}* /home/d24h_prog2/chris/logs/
+
+number=$(echo ${PBS_JOBID} | awk -F . '{ print $1 }')
+mv /home/d24h_prog2/chris/logs/${PBS_JOBNAME}.o${number} /home/d24h_prog2/chris/logs/${PBS_JOBNAME}.o${number}.txt
+echo "Hello there" | mail -s "Subject: bloodmeal-id blastn nt log" --attach=/home/d24h_prog2/chris/logs/${PBS_JOBNAME}.o${number}.txt chris.leung@c2i.hk
+
+exit 0
