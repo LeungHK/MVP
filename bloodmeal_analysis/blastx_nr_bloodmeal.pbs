@@ -55,10 +55,11 @@ SRA="batson_158"
 
 path="/home/d24h_prog2/chris/taxon_discovery/${SRA}"
 mkdir ${SRA}
-
 cd ${path}
 
+mkdir /home/d24h_prog2/chris/data/blast
 cd /home/d24h_prog2/chris/data/blast/
+/home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/update_blastdb.pl --decompress nt nr taxdb
 
 /home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/blastx \
 -query ${path}/RNA_seq_sorted_match_bloodmeal_${SRA}.fasta \
