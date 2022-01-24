@@ -8,4 +8,5 @@
 * Note: currently showing results of all blast hits to bloodmeal contigs; still have to do LCA clustering of BLAST hits for each bloodmeal contig
 * 
 # HMP.sqrt_scale.png
-![Hi alt text](https://github.com/LeungHK/MVP/blob/main/bloodmeal_analysis/HMP.sqrt_scale.png)
+![Hi alt text](https://github.com/LeungHK/MVP/blob/main/bloodmeal_analysis/fake-metadata_HMP.sqrt_scale.png)
+![Hi alt text](https://github.com/LeungHK/MVP/blob/main/bloodmeal_analysis/fake-metadata_HMP.sqrt_scale.legend.png)
