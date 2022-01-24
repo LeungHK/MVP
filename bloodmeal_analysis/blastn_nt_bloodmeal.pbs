@@ -1,6 +1,6 @@
 #!/bin/sh
 ### Job name
-#PBS -N chris_bloodmeal-id-blastn_taxid_nt
+#PBS -N bloodmeal-id-blastn_taxid_nt
 ### Declare job non-rerunable
 #PBS -r n
 #PBS -j oe
@@ -55,11 +55,9 @@ SRA="batson_158"
 
 path="/home/d24h_prog2/chris/taxon_discovery/${SRA}"
 
-#cd /home/d24h_prog2/PUBLIC_DB/nt/
+mkdir /home/d24h_prog2/chris/data/blast
 cd /home/d24h_prog2/chris/data/blast/
-#/home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/update_blastdb.pl --decompress nt nr taxdb
-
-ls taxdb.*
+/home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/update_blastdb.pl --decompress nt nr taxdb
 
 /home/d24h_prog2/public_program/ncbi-blast-2.10.0+/bin/blastn \
 -query ${path}/RNA_seq_sorted_match_bloodmeal_${SRA}.fasta \
@@ -69,6 +67,7 @@ ls taxdb.*
 -evalue 0.00005 \
 -outfmt "6 qseqid sseqid evalue pident staxids sscinames scomnames stitle sskingdoms salltitles"
 
+##find single best blast hit for each contig
 cd ${path}
 sort -k1,1 -k3,3g -k4,4gr bloodmeal_${SRA}_blastn_nt.out6 | sort -u -k1,1 --merge > bestHits_bloodmeal_${SRA}_blastn_nt.out6
 
