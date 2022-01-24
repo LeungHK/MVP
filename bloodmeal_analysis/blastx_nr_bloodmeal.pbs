@@ -1,6 +1,6 @@
 #!/bin/sh
 ### Job name
-#PBS -N chris_bloodmeal-id-blastx_taxid_nr
+#PBS -N bloodmeal-id-blastx_taxid_nr
 ### Declare job non-rerunable
 #PBS -r n
 #PBS -j oe
@@ -54,12 +54,9 @@ echo "number of threads: ${threads}"
 SRA="batson_158"
 
 path="/home/d24h_prog2/chris/taxon_discovery/${SRA}"
-#mkdir ${SRA}
+mkdir ${SRA}
 
 cd ${path}
-#head -2 RNA_seq_sorted_match_bloodmeal_${SRA}.fasta > top_RNA_seq_sorted_match_bloodmeal_${SRA}.fasta
-#cd /home/d24h_prog2/chris/data/virome_mosq/blast_db/
-#export BLASTDB="/home/d24h_prog2/chris/data/virome_mosq/blast_db/taxdb"
 
 cd /home/d24h_prog2/chris/data/blast/
 
@@ -70,12 +67,7 @@ cd /home/d24h_prog2/chris/data/blast/
 -out ${path}/bloodmeal.contigs.blastx.nr.fmt6 -evalue 0.00005 \
 -outfmt "6 qseqid sseqid evalue pident staxids sscinames scomnames stitle sskingdoms salltitles"
 
-#-db /home/d24h_prog2/chris/data/virome_mosq/blast_db/ \
-# scomname
-#-db nr \
-#outfmt 10 is csv
-#[-taxids taxids] [-negative_taxids taxids] [-taxidlist filename]
-
+##find single best blast hit for each contig
 cd ${path}
 sort -k1,1 -k3,3g -k4,4gr bloodmeal.contigs.blastx.nr.fmt6 | sort -u -k1,1 --merge > bestHits_bloodmeal.contigs.blastx.nr.fmt6
 
