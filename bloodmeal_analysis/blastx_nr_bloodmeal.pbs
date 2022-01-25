@@ -68,7 +68,8 @@ cd /home/d24h_prog2/chris/data/blast/
 -out ${path}/bloodmeal.contigs.blastx.nr.fmt6 -evalue 0.00005 \
 -outfmt "6 qseqid sseqid evalue pident staxids sscinames scomnames stitle sskingdoms salltitles"
 
-##find single best blast hit for each contig
+##find single best blast hit for each contig, soring by 1. query name, 2. evalue, 3. nucleotide identity, 
+##and extract the best line for each query (evalue more important than nucleotide identity)
 cd ${path}
 sort -k1,1 -k3,3g -k4,4gr bloodmeal.contigs.blastx.nr.fmt6 | sort -u -k1,1 --merge > bestHits_bloodmeal.contigs.blastx.nr.fmt6
 
